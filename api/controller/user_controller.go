@@ -36,7 +36,7 @@ func CreateUser(ctx *gin.Context) {
 	if err != nil {
 		log.Println(err)
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"response": "bad request",
+			"response": "bad db connection",
 		})
 		return
 	}
@@ -45,7 +45,7 @@ func CreateUser(ctx *gin.Context) {
 	queryResults := db.Where("username = ?", username).Limit(1).Find(&user)
 	if queryResults.RowsAffected > 0 {
 		log.Println("Username already exists")
-		ctx.JSON(http.StatusBadRequest, gin.H{"response": "username already exists"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"response": "Username already exists"})
 		return
 	}
 
@@ -53,7 +53,7 @@ func CreateUser(ctx *gin.Context) {
 	if err != nil {
 		log.Println(err)
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"response": "bad request",
+			"response": "bad password hashing",
 		})
 		return
 	}
