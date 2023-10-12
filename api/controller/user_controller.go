@@ -7,9 +7,9 @@ import (
 
 	"github.com/access-module/api/db"
 	"github.com/access-module/api/model"
-	"github.com/access-module/api/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // https://github.com/go-playground/validator
@@ -49,7 +49,7 @@ func CreateUser(ctx *gin.Context) {
 		return
 	}
 
-	hashedPassword, err := utils.HashPassword(req.Password)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost) // 10
 	if err != nil {
 		log.Println(err)
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -61,13 +61,13 @@ func CreateUser(ctx *gin.Context) {
 	user = model.User{
 		Id:             uuid.NewString(),
 		Username:       username,
-		HashedPassword: hashedPassword,
+		HashedPassword: string(hashedPassword),
 	}
 
-	result := db.Create(&user) // pass pointer of data to Create
+	result := db.Create(&user)
 	ctx.JSON(http.StatusOK, result)
 
 }
 func ListUser(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, "list users")
+	ctx.JSON(http.StatusOK, "you are so smart")
 }

@@ -2,14 +2,15 @@ package middleware
 
 import (
 	"encoding/base64"
+	"fmt"
 	"strings"
 
 	"net/http"
 
 	"github.com/access-module/api/db"
 	"github.com/access-module/api/model"
-	"github.com/access-module/api/utils"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func Authentication() gin.HandlerFunc {
@@ -56,11 +57,17 @@ func Authentication() gin.HandlerFunc {
 			return
 		}
 
-		if utils.CheckPassword(password, user.HashedPassword) != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"6error": ERROR_MESSAGE})
+		fmt.Println("user.HashedPassword:", user.HashedPassword)
+		fmt.Println("password:", password)
+
+		err = bcrypt.CompareHashAndPassword([]byte(user.HashedPassword), []byte(password))
+		if err != nil {
+			fmt.Println("err:", err)
+			c.JSON(http.StatusUnauthorized, gin.H{"error": ERROR_MESSAGE})
 			c.Abort()
 			return
 		}
+		fmt.Println("err:", err)
 
 		c.Next()
 	}

@@ -1,7 +1,6 @@
 package db
 
 import (
-	"github.com/access-module/api/model"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -16,8 +15,6 @@ func Connect() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	db.AutoMigrate(&model.User{})
-	
 	return db, nil
 
 }
