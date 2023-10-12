@@ -59,9 +59,9 @@ func CreateUser(ctx *gin.Context) {
 	}
 
 	user = model.User{
-		Id:       uuid.NewString(),
-		Username: username,
-		Password: hashedPassword,
+		Id:             uuid.NewString(),
+		Username:       username,
+		HashedPassword: hashedPassword,
 	}
 
 	result := db.Create(&user) // pass pointer of data to Create
@@ -69,7 +69,5 @@ func CreateUser(ctx *gin.Context) {
 
 }
 func ListUser(ctx *gin.Context) {
-
 	ctx.JSON(http.StatusOK, "list users")
-
 }

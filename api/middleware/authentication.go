@@ -2,19 +2,23 @@ package middleware
 
 import (
 	"encoding/base64"
-	"fmt"
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/access-module/api/db"
+	"github.com/access-module/api/model"
+	"github.com/access-module/api/utils"
+	"github.com/gin-gonic/gin"
 )
 
 func Authentication() gin.HandlerFunc {
+	ERROR_MESSAGE := "Unauthorized"
 	return func(c *gin.Context) {
 		authHeader := c.Request.Header.Get("Authorization")
 
 		if authHeader == "" || !strings.HasPrefix(authHeader, "Basic ") {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": ERROR_MESSAGE})
 			c.Abort()
 			return
 		}
@@ -23,25 +27,40 @@ func Authentication() gin.HandlerFunc {
 
 		decoded, err := base64.StdEncoding.DecodeString(credentialsBase64)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": ERROR_MESSAGE})
 			c.Abort()
 			return
 		}
 
 		credentials := strings.SplitN(string(decoded), ":", 2)
 		if len(credentials) != 2 {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials format"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": ERROR_MESSAGE})
 			c.Abort()
 			return
 		}
 
-		// username := credentials[0]
-		// password := credentials[1]
-		// fmt.Println("👉 username:", username)
-		// fmt.Println("👉 password:", password)
-		fmt.Println("👉 Authentication: ✅")
+		username := credentials[0]
+		password := credentials[1]
 
-		// Go to db and check for the presence of the user:
+		db, err := db.Connect()
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": ERROR_MESSAGE})
+			c.Abort()
+			return
+		}
+
+		var user model.User
+		if err := db.Where("username = ?", username).First(&user).Error; err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": ERROR_MESSAGE})
+			c.Abort()
+			return
+		}
+
+		if utils.CheckPassword(password, user.HashedPassword) != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"6error": ERROR_MESSAGE})
+			c.Abort()
+			return
+		}
 
 		c.Next()
 	}
