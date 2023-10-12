@@ -57,9 +57,6 @@ func Authentication() gin.HandlerFunc {
 			return
 		}
 
-		fmt.Println("user.HashedPassword:", user.HashedPassword)
-		fmt.Println("password:", password)
-
 		err = bcrypt.CompareHashAndPassword([]byte(user.HashedPassword), []byte(password))
 		if err != nil {
 			fmt.Println("err:", err)
@@ -67,7 +64,6 @@ func Authentication() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		fmt.Println("err:", err)
 
 		c.Next()
 	}
