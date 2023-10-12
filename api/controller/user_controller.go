@@ -42,7 +42,7 @@ func CreateUser(ctx *gin.Context) {
 	}
 
 	var user model.User
-	queryResults := db.Where("username = ?", username).First(&user)
+	queryResults := db.Where("username = ?", username).Limit(1).Find(&user)
 	if queryResults.RowsAffected > 0 {
 		log.Println("Username already exists")
 		ctx.JSON(http.StatusBadRequest, gin.H{"response": "username already exists"})
